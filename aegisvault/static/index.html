@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AegisVault · BLINDSPOT</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <div>
+        <p class="kicker">BLINDSPOT</p>
+        <h1>AegisVault</h1>
+      </div>
+    </div>
+    <p class="lede">A local gate between you and cloud AI. Prompts and images are read on this machine, then masked or stopped before they can leave.</p>
+    <p class="status" id="health">Checking the local engine…</p>
+  </header>
+
+  <main>
+    <section class="panel input-panel">
+      <div class="panel-head">
+        <h2>Before it leaves</h2>
+        <div class="presets" role="group" aria-label="Examples">
+          <button type="button" data-preset="clinical">Clinical note</button>
+          <button type="button" data-preset="clean">Ordinary question</button>
+          <button type="button" data-preset="inject">Hidden instruction</button>
+          <button type="button" id="load-card">Sample ID image</button>
+        </div>
+      </div>
+      <label for="prompt">Prompt</label>
+      <textarea id="prompt" rows="12" placeholder="Paste the prompt you would have sent to a cloud model."></textarea>
+      <label for="image">Image</label>
+      <div class="drop" id="drop">
+        <input id="image" type="file" accept="image/png,image/jpeg,image/webp" />
+        <p id="file-label">Drop a screenshot, ID, or report. It stays on this computer.</p>
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" id="inspect">Inspect locally</button>
+        <button type="button" class="ghost" id="forward" disabled>Forward masked copy</button>
+      </div>
+    </section>
+
+    <section class="panel result-panel" aria-live="polite">
+      <div class="panel-head">
+        <h2>Decision</h2>
+        <span class="badge" id="badge">Waiting</span>
+      </div>
+      <p class="summary" id="summary">Nothing has been inspected yet.</p>
+      <ul class="notes" id="notes"></ul>
+      <h3>What would be sent</h3>
+      <pre id="sanitized">—</pre>
+      <h3>Findings</h3>
+      <div id="findings" class="findings"></div>
+      <h3>Image after local redaction</h3>
+      <div class="compare" id="compare" hidden>
+        <figure>
+          <figcaption>Original, still on this machine</figcaption>
+          <img id="original-preview" alt="Original upload" />
+        </figure>
+        <figure>
+          <figcaption>Copy with sensitive regions pixelated</figcaption>
+          <img id="redacted-preview" alt="Redacted image" />
+        </figure>
+      </div>
+      <p class="quiet" id="image-empty">No image in this inspection.</p>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
