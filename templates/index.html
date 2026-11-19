@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisVault | Semantic Firewall</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="brand">
+        <div class="brand-icon">A</div>
+        <div>
+            <h2>AEGISVAULT</h2>
+            <span>SEMANTIC FIREWALL</span>
+        </div>
+    </div>
+
+    <div class="status">
+        <span class="status-dot"></span>
+        LOCAL SECURITY ENGINE
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="hero">
+        <p class="eyebrow">AI SECURITY GATEWAY</p>
+        <h1>Protect your data.<br><span>Secure your AI interactions.</span></h1>
+        <p class="hero-description">
+            Detect sensitive information, identify malicious instructions,
+            and sanitize content before it reaches external AI tools.
+        </p>
+    </section>
+
+    <section class="scanner-card">
+
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">SECURITY SCANNER</p>
+                <h2>Inspect your content</h2>
+            </div>
+            <span class="local-label">LOCAL PROCESSING</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" id="textTab" type="button"
+                    onclick="showTab('text')">
+                Text Scanner
+            </button>
+
+            <button class="tab" id="imageTab" type="button"
+                    onclick="showTab('image')">
+                Image Scanner
+            </button>
+        </div>
+
+        <form action="/scan" method="POST" id="textForm">
+
+            <input type="hidden" name="scan_type" value="text">
+
+            <label for="user_text">Enter text to inspect</label>
+
+            <textarea
+                id="user_text"
+                name="user_text"
+                placeholder="Paste your text or AI prompt here..."
+                required
+            ></textarea>
+
+            <div class="form-footer">
+                <span>Text is processed by your local security engine.</span>
+                <button class="primary-button" type="submit">
+                    Scan Text
+                </button>
+            </div>
+
+        </form>
+
+        <form action="/scan" method="POST" enctype="multipart/form-data"
+              id="imageForm" style="display:none;">
+
+            <input type="hidden" name="scan_type" value="image">
+
+            <label for="image">Upload an image to inspect</label>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-symbol">↑</div>
+                <h3>Choose an image</h3>
+                <p>PNG, JPG, JPEG, BMP or TIFF · Maximum 10 MB</p>
+
+                <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept=".png,.jpg,.jpeg,.bmp,.tiff"
+                    required
+                >
+
+                <label for="image" class="file-button">
+                    Browse files
+                </label>
+
+                <p id="fileName">No image selected</p>
+            </div>
+
+            <div class="form-footer">
+                <span>Image text is extracted using OCR.</span>
+                <button class="primary-button" type="submit">
+                    Scan Image
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+    {% if error %}
+    <section class="result-card error-card">
+        <h2>Scan Error</h2>
+        <p>{{ error }}</p>
+    </section>
+    {% endif %}
+
+    {% if result %}
+
+    <section class="result-card">
+
+        <div class="result-heading">
+            <div>
+                <p class="eyebrow">SCAN REPORT</p>
+                <h2>Security Analysis</h2>
+            </div>
+
+            <span class="decision {{ result.decision|lower }}">
+                {{ result.decision }}
+            </span>
+        </div>
+
+        <p class="result-message">{{ result.message }}</p>
+
+        {% if result.pii_count is defined %}
+        <div class="metric">
+            <span>Sensitive items detected</span>
+            <strong>{{ result.pii_count }}</strong>
+        </div>
+        {% endif %}
+
+        {% if result.safe_output is defined and result.safe_output is not none %}
+        <div class="output-section">
+            <h3>Protected Text Output</h3>
+            <pre>{{ result.safe_output }}</pre>
+        </div>
+        {% endif %}
+
+        {% if result.masked_image_url %}
+        <div class="output-section">
+            <h3>Masked Image</h3>
+            <img class="masked-image"
+                 src="{{ result.masked_image_url }}"
+                 alt="Masked image">
+        </div>
+        {% endif %}
+
+        {% if result.injection_findings %}
+        <div class="output-section">
+            <h3>Injection Detection Findings</h3>
+            {% for finding in result.injection_findings %}
+            <div class="finding">
+                <strong>{{ finding.category }}</strong>
+                <span>{{ finding.severity }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </section>
+
+    {% endif %}
+
+    <section class="features">
+
+<section class="audit-section">
+
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">SECURITY MONITORING</p>
+            <h2>Audit Dashboard</h2>
+        </div>
+        <span class="local-label">SQLITE DATABASE</span>
+    </div>
+
+    {% if audit_stats %}
+    <div class="audit-stats">
+
+        <div class="audit-stat">
+            <span>Total Scans</span>
+            <strong>{{ audit_stats.total }}</strong>
+        </div>
+
+        <div class="audit-stat">
+            <span>Safe</span>
+            <strong>{{ audit_stats.safe }}</strong>
+        </div>
+
+        <div class="audit-stat">
+            <span>Sanitized</span>
+            <strong>{{ audit_stats.sanitized }}</strong>
+        </div>
+
+        <div class="audit-stat">
+            <span>Blocked</span>
+            <strong>{{ audit_stats.blocked }}</strong>
+        </div>
+
+        <div class="audit-stat">
+            <span>Review</span>
+            <strong>{{ audit_stats.review }}</strong>
+        </div>
+
+    </div>
+    {% endif %}
+
+    <h3 class="audit-title">Recent Security Activity</h3>
+
+    {% if audit_logs %}
+
+    <div class="audit-table-wrapper">
+        <table class="audit-table">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date and Time (UTC)</th>
+                    <th>Input</th>
+                    <th>Decision</th>
+                    <th>Detected</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for log in audit_logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.timestamp[:19].replace("T", " ") }}</td>
+                    <td>{{ log.input_type|upper }}</td>
+                    <td>
+                        <span class="audit-decision {{ log.decision|lower }}">
+                            {{ log.decision }}
+                        </span>
+                    </td>
+                    <td>{{ log.pii_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    {% else %}
+
+    <p class="empty-audit">
+        No security activity recorded yet. Run your first scan!
+    </p>
+
+    {% endif %}
+
+    <p class="audit-note">
+        Audit records contain security metadata only.
+        Submitted content and sensitive values are not stored here.
+    </p>
+
+</section>
+
+        <div class="feature">
+            <span>01</span>
+            <h3>Data Protection</h3>
+            <p>Identify sensitive information before it is shared.</p>
+        </div>
+
+        <div class="feature">
+            <span>02</span>
+            <h3>Prompt Security</h3>
+            <p>Detect suspicious instructions and injection attempts.</p>
+        </div>
+
+        <div class="feature">
+            <span>03</span>
+            <h3>Content Sanitization</h3>
+            <p>Mask sensitive content before further processing.</p>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    AEGISVAULT · LOCAL AI SECURITY GATEWAY
+</footer>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

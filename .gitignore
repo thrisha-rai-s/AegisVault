@@ -43,3 +43,16 @@ Thumbs.db
 .aegis/
 # Pytest cache
 .pytest_cache/
+# AegisVault private data
+.aegis/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment
+.venv/
+.env
